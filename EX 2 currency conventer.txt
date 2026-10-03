@@ -1,0 +1,132 @@
+package currency;
+
+public class CurrencyConverter {
+
+    public void dollarToINR(double dollar) {
+        System.out.println("Dollar to INR = " + (dollar * 83));
+    }
+
+    public void inrToDollar(double inr) {
+        System.out.println("INR to Dollar = " + (inr / 83));
+    }
+
+    public void euroToINR(double euro) {
+        System.out.println("Euro to INR = " + (euro * 90));
+    }
+
+    public void inrToEuro(double inr) {
+        System.out.println("INR to Euro = " + (inr / 90));
+    }
+
+    public void yenToINR(double yen) {
+        System.out.println("Yen to INR = " + (yen * 0.56));
+    }
+
+    public void inrToYen(double inr) {
+        System.out.println("INR to Yen = " + (inr / 0.56));
+    }
+}
+
+package distance;
+
+public class DistanceConverter {
+
+    public void meterToKM(double meter) {
+        System.out.println("Meter to KM = " + (meter / 1000));
+    }
+
+    public void kmToMeter(double km) {
+        System.out.println("KM to Meter = " + (km * 1000));
+    }
+
+    public void milesToKM(double miles) {
+        System.out.println("Miles to KM = " + (miles * 1.609));
+    }
+
+    public void kmToMiles(double km) {
+        System.out.println("KM to Miles = " + (km / 1.609));
+    }
+}
+
+package time;
+
+public class TimeConverter {
+
+    public void hoursToMinutes(double hours) {
+        System.out.println("Hours to Minutes = " + (hours * 60));
+    }
+
+    public void minutesToHours(double minutes) {
+        System.out.println("Minutes to Hours = " + (minutes / 60));
+    }
+
+    public void hoursToSeconds(double hours) {
+        System.out.println("Hours to Seconds = " + (hours * 3600));
+    }
+
+    public void secondsToHours(double seconds) {
+        System.out.println("Seconds to Hours = " + (seconds / 3600));
+    }
+}
+
+import currency.CurrencyConverter;
+import distance.DistanceConverter;
+import time.TimeConverter;
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        CurrencyConverter c = new CurrencyConverter();
+        DistanceConverter d = new DistanceConverter();
+        TimeConverter t = new TimeConverter();
+
+        System.out.println("===== Currency Converter =====");
+        c.dollarToINR(10);
+        c.inrToDollar(830);
+        c.euroToINR(5);
+        c.inrToEuro(450);
+        c.yenToINR(100);
+        c.inrToYen(560);
+
+        System.out.println("\n===== Distance Converter =====");
+        d.meterToKM(5000);
+        d.kmToMeter(5);
+        d.milesToKM(10);
+        d.kmToMiles(16.09);
+
+        System.out.println("\n===== Time Converter =====");
+        t.hoursToMinutes(2);
+        t.minutesToHours(120);
+        t.hoursToSeconds(2);
+        t.secondsToHours(7200);
+    }
+}
+
+
+
+
+
+
+
+
+OUTPUT :
+===== Currency Converter =====
+Dollar to INR = 830.0
+INR to Dollar = 10.0
+Euro to INR = 450.0
+INR to Euro = 5.0
+Yen to INR = 56.0
+INR to Yen = 1000.0
+
+===== Distance Converter =====
+Meter to KM = 5.0
+KM to Meter = 5000.0
+Miles to KM = 16.09
+KM to Miles = 10.0
+
+===== Time Converter =====
+Hours to Minutes = 120.0
+Minutes to Hours = 2.0
+Hours to Seconds = 7200.0
+Seconds to Hours = 2.0
