@@ -1,0 +1,592 @@
+import javax.swing.*; 
+import java.awt.*; 
+import java.sql.*; 
+import java.util.ArrayList; 
+ 
+public class OnlineQuizApplication extends JFrame { 
+ 
+ static final String DB_URL = 
+         "jdbc:mysql://localhost:3306/online_quiz"; 
+ 
+ static final String DB_USER = "root"; 
+ static final String DB_PASSWORD = "root"; 
+ 
+ JTextField nameField; 
+ JButton startButton; 
+ 
+ JLabel questionLabel; 
+ JRadioButton optionA, optionB, optionC, optionD; 
+ ButtonGroup optionGroup; 
+ JButton nextButton; 
+ 
+ ArrayList<Question> questions; 
+ 
+ int currentQuestion = 0; 
+ int score = 0; 
+ 
+ String studentName; 
+ 
+ public OnlineQuizApplication() { 
+     showLoginScreen(); 
+ } 
+ 
+ // Database Connection 
+ public static Connection getConnection() 
+         throws SQLException { 
+ 
+     return DriverManager.getConnection( 
+             DB_URL, 
+             DB_USER, 
+             DB_PASSWORD 
+     ); 
+ } 
+ 
+ // Login Screen 
+ void showLoginScreen() { 
+ 
+     setTitle("Online Quiz Application"); 
+     setSize(500, 350); 
+     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+     setLocationRelativeTo(null); 
+ 
+     JPanel panel = new JPanel(); 
+     panel.setLayout(null); 
+     panel.setBackground(new Color(240, 248, 255)); 
+ 
+     JLabel title = 
+             new JLabel("ONLINE QUIZ APPLICATION"); 
+ 
+     title.setFont( 
+             new Font("Arial", Font.BOLD, 24) 
+     ); 
+ 
+     title.setBounds(90, 40, 350, 40); 
+     panel.add(title); 
+ 
+     JLabel nameLabel = 
+             new JLabel("Student Name:"); 
+ 
+     nameLabel.setFont( 
+             new Font("Arial", Font.PLAIN, 17) 
+     ); 
+ 
+     nameLabel.setBounds(80, 120, 130, 30); 
+     panel.add(nameLabel); 
+ 
+     nameField = new JTextField(); 
+     nameField.setBounds(210, 120, 180, 30); 
+     panel.add(nameField); 
+ 
+     startButton = new JButton("Start Quiz"); 
+     startButton.setBounds(170, 190, 150, 40); 
+     panel.add(startButton); 
+ 
+     startButton.addActionListener( 
+             e -> startQuiz() 
+     ); 
+ 
+     add(panel); 
+     setVisible(true); 
+ } 
+ 
+ // Start Quiz 
+ void startQuiz() { 
+ 
+     studentName = 
+             nameField.getText().trim(); 
+ 
+     if (studentName.isEmpty()) { 
+ 
+         JOptionPane.showMessageDialog( 
+                 this, 
+                 "Please enter your name!" 
+         ); 
+ 
+         return; 
+     } 
+ 
+     questions = new ArrayList<>(); 
+ 
+     loadQuestions(); 
+ 
+     if (questions.size() == 0) { 
+ 
+         JOptionPane.showMessageDialog( 
+                 this, 
+                 "No questions found!" 
+         ); 
+ 
+         return; 
+     } 
+ 
+     getContentPane().removeAll(); 
+ 
+     createQuizScreen(); 
+ 
+     revalidate(); 
+     repaint(); 
+ 
+     displayQuestion(); 
+ } 
+ 
+ // Load Questions 
+ void loadQuestions() { 
+ 
+     String sql = 
+             "SELECT * FROM questions ORDER BY id"; 
+ 
+     try ( 
+             Connection connection = 
+                     getConnection(); 
+ 
+             Statement statement = 
+                     connection.createStatement(); 
+ 
+             ResultSet resultSet = 
+                     statement.executeQuery(sql) 
+     ) { 
+ 
+         while (resultSet.next()) { 
+ 
+             Question q = 
+                     new Question( 
+                             resultSet.getInt("id"), 
+                             resultSet.getString("question"), 
+                             resultSet.getString("option_a"), 
+                             resultSet.getString("option_b"), 
+                             resultSet.getString("option_c"), 
+                             resultSet.getString("option_d"), 
+                             resultSet.getString("answer") 
+                     ); 
+ 
+             questions.add(q); 
+         } 
+ 
+     } catch (SQLException e) { 
+ 
+         JOptionPane.showMessageDialog( 
+                 this, 
+                 "Database Error: " 
+                         + e.getMessage() 
+         ); 
+     } 
+ } 
+ 
+ // Quiz Screen 
+ void createQuizScreen() { 
+ 
+     JPanel panel = new JPanel(); 
+     panel.setLayout(null); 
+     panel.setBackground(Color.WHITE); 
+ 
+     JLabel title = 
+             new JLabel("ONLINE QUIZ"); 
+ 
+     title.setFont( 
+             new Font("Arial", Font.BOLD, 26) 
+     ); 
+ 
+     title.setBounds(250, 20, 250, 40); 
+     panel.add(title); 
+ 
+     questionLabel = new JLabel(); 
+ 
+     questionLabel.setFont( 
+             new Font("Arial", Font.BOLD, 18) 
+     ); 
+ 
+     questionLabel.setBounds( 
+             40, 80, 650, 50 
+     ); 
+ 
+     panel.add(questionLabel); 
+ 
+     optionA = new JRadioButton(); 
+     optionB = new JRadioButton(); 
+     optionC = new JRadioButton(); 
+     optionD = new JRadioButton(); 
+ 
+     optionA.setBounds(60, 150, 600, 40); 
+     optionB.setBounds(60, 200, 600, 40); 
+     optionC.setBounds(60, 250, 600, 40); 
+     optionD.setBounds(60, 300, 600, 40); 
+ 
+     optionA.setBackground(Color.WHITE); 
+     optionB.setBackground(Color.WHITE); 
+     optionC.setBackground(Color.WHITE); 
+     optionD.setBackground(Color.WHITE); 
+ 
+     panel.add(optionA); 
+     panel.add(optionB); 
+     panel.add(optionC); 
+     panel.add(optionD); 
+ 
+     optionGroup = new ButtonGroup(); 
+ 
+     optionGroup.add(optionA); 
+     optionGroup.add(optionB); 
+     optionGroup.add(optionC); 
+     optionGroup.add(optionD); 
+ 
+     nextButton = new JButton("Next"); 
+ 
+     nextButton.setBounds( 
+             280, 370, 140, 40 
+     ); 
+ 
+     panel.add(nextButton); 
+ 
+     nextButton.addActionListener( 
+             e -> nextQuestion() 
+     ); 
+ 
+     add(panel); 
+ } 
+ 
+ // Display Question 
+ void displayQuestion() { 
+ 
+     Question q = 
+             questions.get(currentQuestion); 
+ 
+     questionLabel.setText( 
+             "Q" + 
+             (currentQuestion + 1) 
+             + ". " 
+             + q.question 
+     ); 
+ 
+     optionA.setText( 
+             "A. " + q.optionA 
+     ); 
+ 
+     optionB.setText( 
+             "B. " + q.optionB 
+     ); 
+ 
+     optionC.setText( 
+             "C. " + q.optionC 
+     ); 
+ 
+     optionD.setText( 
+             "D. " + q.optionD 
+     ); 
+ 
+     optionGroup.clearSelection(); 
+ 
+     if (currentQuestion == 
+             questions.size() - 1) { 
+ 
+         nextButton.setText( 
+                 "Submit Quiz" 
+         ); 
+ 
+     } else { 
+ 
+         nextButton.setText( 
+                 "Next" 
+         ); 
+     } 
+ } 
+ 
+ // Next Question 
+ void nextQuestion() { 
+ 
+     String selectedAnswer = 
+             getSelectedAnswer(); 
+ 
+     if (selectedAnswer == null) { 
+ 
+         JOptionPane.showMessageDialog( 
+                 this, 
+                 "Please select an answer!" 
+         ); 
+ 
+         return; 
+     } 
+ 
+     Question q = 
+             questions.get(currentQuestion); 
+ 
+     if (selectedAnswer.equalsIgnoreCase( 
+             q.answer)) { 
+ 
+         score++; 
+     } 
+ 
+     currentQuestion++; 
+ 
+     if (currentQuestion < 
+             questions.size()) { 
+ 
+         displayQuestion(); 
+ 
+     } else { 
+ 
+         saveResult(); 
+         showResult(); 
+     } 
+ } 
+ 
+ // Get Selected Answer 
+ String getSelectedAnswer() { 
+ 
+     if (optionA.isSelected()) 
+         return "A"; 
+ 
+     if (optionB.isSelected()) 
+         return "B"; 
+ 
+     if (optionC.isSelected()) 
+         return "C"; 
+ 
+     if (optionD.isSelected()) 
+         return "D"; 
+ 
+     return null; 
+ } 
+ 
+ // Save Result 
+ void saveResult() { 
+ 
+     String sql = 
+             "INSERT INTO results" 
+             + "(student_name, score, total)" 
+             + " VALUES (?, ?, ?)"; 
+ 
+     try ( 
+             Connection connection = 
+                     getConnection(); 
+ 
+             PreparedStatement statement = 
+                     connection.prepareStatement(sql) 
+     ) { 
+ 
+         statement.setString( 
+                 1, studentName 
+         ); 
+ 
+         statement.setInt( 
+                 2, score 
+         ); 
+ 
+         statement.setInt( 
+                 3, questions.size() 
+         ); 
+ 
+         statement.executeUpdate(); 
+ 
+     } catch (SQLException e) { 
+ 
+         JOptionPane.showMessageDialog( 
+                 this, 
+                 "Result could not be saved!" 
+         ); 
+     } 
+ } 
+ 
+ // Result Screen 
+ void showResult() { 
+ 
+     getContentPane().removeAll(); 
+ 
+     JPanel panel = new JPanel(); 
+     panel.setLayout(null); 
+     panel.setBackground( 
+             new Color(240, 248, 255) 
+     ); 
+ 
+     JLabel title = 
+             new JLabel("QUIZ RESULT"); 
+ 
+     title.setFont( 
+             new Font("Arial", Font.BOLD, 28) 
+     ); 
+ 
+     title.setBounds( 
+             170, 40, 250, 40 
+     ); 
+ 
+     panel.add(title); 
+ 
+     JLabel name = 
+             new JLabel( 
+                     "Student Name: " 
+                     + studentName 
+             ); 
+ 
+     name.setFont( 
+             new Font("Arial", Font.PLAIN, 18) 
+     ); 
+ 
+     name.setBounds( 
+             130, 110, 300, 30 
+     ); 
+ 
+     panel.add(name); 
+ 
+     JLabel scoreLabel = 
+             new JLabel( 
+                     "Score: " 
+                     + score 
+                     + " / " 
+                     + questions.size() 
+             ); 
+ 
+     scoreLabel.setFont( 
+             new Font("Arial", Font.BOLD, 24) 
+     ); 
+ 
+     scoreLabel.setBounds( 
+             170, 160, 250, 40 
+     ); 
+ 
+     panel.add(scoreLabel); 
+ 
+     double percentage = 
+             ((double) score 
+                     / questions.size()) 
+                     * 100; 
+ 
+     JLabel percentageLabel = 
+             new JLabel( 
+                     String.format( 
+                             "Percentage: %.2f%%", 
+                             percentage 
+                     ) 
+             ); 
+ 
+     percentageLabel.setFont( 
+             new Font("Arial", Font.PLAIN, 18) 
+     ); 
+ 
+     percentageLabel.setBounds( 
+             160, 215, 300, 30 
+     ); 
+ 
+     panel.add(percentageLabel); 
+ 
+     JButton exitButton = 
+             new JButton("Exit"); 
+ 
+     exitButton.setBounds( 
+             190, 270, 120, 40 
+     ); 
+ 
+     panel.add(exitButton); 
+ 
+     exitButton.addActionListener( 
+             e -> System.exit(0) 
+     ); 
+ 
+     add(panel); 
+ 
+     revalidate(); 
+     repaint(); 
+ } 
+ 
+ // Question Class 
+ static class Question { 
+ 
+     int id; 
+ 
+     String question; 
+     String optionA; 
+     String optionB; 
+     String optionC; 
+     String optionD; 
+     String answer; 
+ 
+     Question( 
+             int id, 
+             String question, 
+             String optionA, 
+             String optionB, 
+             String optionC, 
+             String optionD, 
+             String answer) { 
+ 
+         this.id = id; 
+         this.question = question; 
+         this.optionA = optionA; 
+         this.optionB = optionB; 
+         this.optionC = optionC; 
+         this.optionD = optionD; 
+         this.answer = answer; 
+     } 
+ } 
+ 
+ // Main Method 
+ public static void main(String[] args) { 
+ 
+     SwingUtilities.invokeLater( 
+             () -> new OnlineQuizApplication() 
+     ); 
+ } 
+} 
+ 
+ 
+OUTPUT: 
+ 
+ 
+======================================================== 
+          ONLINE QUIZ APPLICATION 
+======================================================== 
+ 
+Student Name : Arun 
+ -------------------------------------------------------- 
+                 ONLINE QUIZ -------------------------------------------------------- 
+ 
+Q1. Which keyword is used to inherit a class in Java? 
+ 
+A. this 
+B. extends 
+C. implements 
+D. super 
+ 
+Selected Answer : B. extends 
+ -------------------------------------------------------- 
+ 
+Q2. Which method is the entry point of a Java program? 
+ 
+A. start() 
+B. run() 
+C. main() 
+D. init() 
+ 
+Selected Answer : C. main() 
+ -------------------------------------------------------- 
+ 
+Q3. Which of these is not a primitive data type in Java? 
+ 
+A. int 
+B. float 
+C. String 
+D. char 
+ 
+Selected Answer : C. String 
+ 
+-------------------------------------------------------- 
+Q4. Which collection does not allow duplicate elements? 
+A. List 
+B. Set 
+C. ArrayList 
+D. Vector 
+Selected Answer : B. Set -------------------------------------------------------- 
+Q5. Which keyword is used to create an object? 
+A. class 
+B. new 
+C. object 
+D. create 
+Selected Answer : B. new -------------------------------------------------------- 
+QUIZ RESULT -------------------------------------------------------- 
+Student Name   
+Total Questions   : 5 
+Correct Answers   : 5 
+Wrong Answers  
+Score          
+: 5 / 5 
+: Arun 
+: 0 
+Percentage     : 100.00% -------------------------------------------------------- 
+QUIZ COMPLETED SUCCESSFULLY -------------------------------------------------------- 
